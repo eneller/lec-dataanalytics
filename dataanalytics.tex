@@ -1,0 +1,104 @@
+\documentclass{article}
+\renewcommand{\figurename}{Abb.} % use a different command when using babel
+\usepackage[utf8x]{inputenc}
+\usepackage[margin=1in]{geometry} % Adjust margins
+\usepackage{caption}
+\usepackage{parskip} % dont indent after paragraphs, figures
+\usepackage{xcolor}
+\usepackage{tikz}
+\PassOptionsToPackage{hyphens}{url}\usepackage{hyperref} % allows urls to follow line breaks of text
+
+\newtheorem{assumption}{Annahme}
+
+
+
+\title{Data Analytics}
+\author{Erik Neller}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Python}
+\section{Klassifikation}
+Bereits (von Hand) gelabelte (klassifizierte) Daten werden in Trainingsdaten und Testdaten aufgeteilt, anhand deren ein Klassifikationsmodell trainiert und getestet wird.
+Bei hinreichender Güte kann das Modell dann zur Klassifikation neuer Daten angewendet werden.
+Verschiedene Methoden unterscheiden sich in Annahmen, Transparenz und Rechenkomplexität, woraus sich verschiedenen Anwendungsbereiche ergeben.
+
+
+\subsection{Evaluation von Klassifikationsmodellen}
+Zur Evaluation eines Klassifikationsmodells kann zB eine Confusion Matrix erstellt werden:
+\begin{center}
+\begin{tabular}{|c|c|c|}
+    \hline
+    & \textbf{tatsächlich wahr} & \textbf{tatsächlich falsch} \\
+    \hline
+    \textbf{Modell: wahr}& True Positive (TP) & False Positive (FP) \\
+    \hline
+    \textbf{Modell: falsch} & False Negative (FN) & True Negative (TN) \\
+    \hline
+\end{tabular}
+\end{center}
+
+Außerdem können aus dieser verschiedene Kennzahlen berechnet werden:
+\begin{itemize}
+    \item $ Precision = \frac{TP}{TP+FP} $ kann für jede Klasse berechnet werden
+    \item $ Recall = \frac{TP}{TP+FN} $ kann für jede Klasse berechnet werden
+    \item $ Accuracy =  \frac{TP+TN}{TP+TN+FP+FN} $
+\end{itemize}
+
+\subsubsection{Cross-Validation mit k Folds}
+Gelabelte Daten werden in $k$ Teile ("Folds") aufgeteilt und jeweils $k-1$ Folds zum Training verwendet,
+der übrige zum Test. Dies wird für alle Folds ($k$ mal) wiederholt, so dass jeder Fold genau ein mal als zum Test verwendet wird.
+
+Vorteile dieser Methode sind die hohe Güte durch die Menge der Testdaten - 
+es werden alle Tupel für Training und Evaluation genutzt.
+Nachteilig ist jedoch der hohe Rechenaufwand sowohl zum Training der Modelle,
+als auch zur Konsolidierung der Modelle.
+
+\begin{itemize}
+    \item \textbf{Makrodurchschnitt:} Kennzahlen werden getrennt für Folds berechnet, 
+    dann ein Durchschnitt darüber genommen. Anfällig für Ausreißer bei verschieden großen Klassen.
+    \item \textbf{Mikrodurschnitt:} Alle Folds werden in einer Confusion Matrix aggregiert, dann Kennzahlen berechnet.
+\end{itemize}
+
+
+\subsection{Naive Bayes}
+\begin{assumption}
+Alle Attribute sind unkorreliert und zur Klassifikation gleich relevant
+\end{assumption}
+
+Simple Methode der Klassifikation, die in der Praxis trotz mangelnder Unabhängigkeit oft eine geringe Fehlerrate besitzt.
+
+Theoretischer Hintergrund ist Bayes' Theorem:
+\[ P(A | B) 
+= \textcolor{gray}{\frac{P(A \cap B)}{P(B)}}
+= \frac{P(A)\cdot P(B | A) }{P(B)} 
+= \frac{prior \cdot likelihood}{evidence}
+= posterior\]
+Wobei $P(A | B)$ die bedingte Wahrscheinlichkeit beschreibt dass Ereignis A eintritt wenn Ereignis B wahr ist.
+Für unabhängige Ereignisse würde $P(A|B) = P(A)$ gelten.
+
+
+Berechnet wird zur Klassifikation allerdings nicht $P(A|B)$, sondern ein dazu proportionaler Wert, da $P(B)$ für eine gegebene Stichprobe gleich ist:
+Es genügt zur Klassifikation also die Rechnung 
+\[ P(A|B)\propto P(B|A) \cdot P(A) \]
+
+Mit $V$ als der Menge der möglichen Klassen und $a_{i}$ als Attribute ergibt sich dann: 
+\[ \max_{v_{j}\in V}( P(v_{j}) \cdot \prod_{i} P(a_{i}| v_{j}) ) \]
+$P(v_{j})$ (Wahrscheinlichkeit der Klassenzugehörigkeit) und $P(a_{i}|v_{j})$ (Wahrscheinlichkeit des Auftretens von Attribut $i$ in Klasse $j$) sind bereits gegeben,
+weshalb die Berechnung dadurch eine niedrige Komplexität und hohe Transparenz aufweist.
+
+\subsection{Entscheidungsbäume}
+Ist eine graphische Darstellung der Klassifikation, bei der zu klassifizierende Instanzen den Baum durchlaufen
+bis sie ein Blatt (Klasse) erreichen. Die Attribute sind dabei in den Knoten gekennzeichnet, deren Ausprägungen an den Kanten.
+
+
+
+\subsection{Support Vector Machines}
+\section{Clustering}
+\subsection{k-Means Clustering}
+\subsection{EM Clustering}
+\section{Assoziationsanalyse}
+\section{Text Mining}
+\end{document}

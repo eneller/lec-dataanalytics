@@ -1,8 +1,9 @@
 \documentclass{article}
-\renewcommand{\figurename}{Abb.} % use a different command when using babel
+\usepackage[ngerman]{babel}
 \usepackage[utf8x]{inputenc}
 \usepackage[margin=1in]{geometry} % Adjust margins
 \usepackage{caption}
+\usepackage{subcaption}
 \usepackage{parskip} % dont indent after paragraphs, figures
 \usepackage{xcolor}
 \usepackage{tikz}
@@ -24,6 +25,8 @@
 Bereits (von Hand) gelabelte (klassifizierte) Daten werden in Trainingsdaten und Testdaten aufgeteilt, anhand deren ein Klassifikationsmodell trainiert und getestet wird.
 Bei hinreichender Güte kann das Modell dann zur Klassifikation neuer Daten angewendet werden.
 Verschiedene Methoden unterscheiden sich in Annahmen, Transparenz und Rechenkomplexität, woraus sich verschiedenen Anwendungsbereiche ergeben.
+In \textbf{Ensemble Learning} können die verschiedenen Klassifikatoren aggregiert und zu einer Mehrheitsentscheidung genutzt werden, 
+so dass Schwächen der einen Methode durch andere ausgeglichen werden (Boosting).
 
 
 \subsection{Evaluation von Klassifikationsmodellen}
@@ -93,9 +96,52 @@ weshalb die Berechnung dadurch eine niedrige Komplexität und hohe Transparenz a
 Ist eine graphische Darstellung der Klassifikation, bei der zu klassifizierende Instanzen den Baum durchlaufen
 bis sie ein Blatt (Klasse) erreichen. Die Attribute sind dabei in den Knoten gekennzeichnet, deren Ausprägungen an den Kanten.
 
+Die Information (in Bits) in einem Elementarereignis $ \{X = x_{i} \} $ beträgt $ I_{X}(x_{i}) = \log_{2}(\frac{1}{p(x_{i})}) = - \log_{2}p(x_{i})$.
+Entropie ist der Erwartungswert der Information, also
+\[ H = E(I) =  -\sum_{i=1}^{n} p_{i} \log_{2}p_{i} \]
+Maximal wäre die Entropie einer Quelle mit $n$ möglichen Symbolen wenn alle Symbole gleich wahrscheinlich sind, 
+also $H_{max} = -n \cdot \frac{1}{n} \cdot \log_{2}(n)$.
+Bäume werden absteigend nach Informationsgewinn aufgebaut, so dass die erste Verzweigung den größten Informationsgewinn beinhaltet.
+
+Zu berechnen ist also die Entropie des Klassifikators abzüglich der erwarteten Entropie nach der Aufteilung anhand des Attributs.
+\begin{figure}[h]
+\begin{minipage}{.3\textwidth}
+\begin{tabular}{c|c|c}
+    & warm & kalt \\
+    \hline
+    Regen &4  &5 \\
+    \hline
+    kein Regen & 3 & 2 \\
+\end{tabular}
+\end{minipage}
+\begin{minipage}{.6\textwidth}
+Die Entropie für Regen ist also $H_{prior} = H(\frac{9}{14},\frac{5}{14})$, 
+nach der Aufteilung anhand des Attributs Temperatur beträgt sie $H_{warm}= H(\frac{4}{7}, \frac{3}{7})$
+und $H_{kalt}= H(\frac{5}{7}, \frac{2}{7})$.
+Also ist die erwartete (Erwartungswert) Entropie nach der Aufteilung anhand der Temperatur $p_{warm} * H_{warm} + p_{kalt} * H_{kalt} $ .
+Der \textbf{Informationsgewinn} berechnet sich dann als Entropie für Regen abzüglich des Erwartungswertes der Entropie.
+Da $H_{prior}$ in dieser Berechnung jedoch konstant ist, kann auch einfach die $E[H]$ nach der Aufteilung minimiert werden.
+\end{minipage}
+\caption{Beispiel Informationsgewinn für Aufbau eines Entscheidungsbaums}
+\end{figure}
+
+
+Vorteil: Niedriger Rechenaufwand und nachvollziehbarer Aufbau 
+Nachteil: Overfitting, geringe Robustheit: bereits kleine Änderungen der Trainingsdaten können zu einer Veränderung des Baums führen.
+
+
+Kann zu einem \textbf{Random Forest} erweitert werden um die Robustheit zu steigern und Overfitting zu verringern.
+Resultiert jedoch in höherem Rechenaufwand und geringerer Interpretierbarkeit.
+Die Trainingsdaten können dafür zufällig gruppiert werden und die Bäume für eine Mehrheitsentscheidung genutzt werden.
+
 
 
 \subsection{Support Vector Machines}
+Support Vector Machines (SVM) haben das Ziel eine Hyperebene zu finden, die zwei Klassen so voneinander trennt,
+dass um die Ebene herum ein möglichst breiter Bereich (Margin) frei von Datenpunkten bleibt.
+Es wird also zunächst eine Ebene aufgestellt, dann Distanzen berechnet und die minimale Distanz maximiert.
+Jeder Punkt kann dann durch seinen Abstand zur Hyperebene und
+
 \section{Clustering}
 \subsection{k-Means Clustering}
 \subsection{EM Clustering}

@@ -7,6 +7,8 @@
 \usepackage{parskip} % dont indent after paragraphs, figures
 \usepackage{xcolor}
 \usepackage{tikz}
+\usepackage{float}
+\usepackage{amsmath}
 \PassOptionsToPackage{hyphens}{url}\usepackage{hyperref} % allows urls to follow line breaks of text
 
 \newtheorem{assumption}{Annahme}
@@ -21,12 +23,24 @@
 \maketitle
 
 \section{Python}
+%TODO
 \section{Klassifikation}
 Bereits (von Hand) gelabelte (klassifizierte) Daten werden in Trainingsdaten und Testdaten aufgeteilt, anhand deren ein Klassifikationsmodell trainiert und getestet wird.
 Bei hinreichender Güte kann das Modell dann zur Klassifikation neuer Daten angewendet werden.
 Verschiedene Methoden unterscheiden sich in Annahmen, Transparenz und Rechenkomplexität, woraus sich verschiedenen Anwendungsbereiche ergeben.
 In \textbf{Ensemble Learning} können die verschiedenen Klassifikatoren aggregiert und zu einer Mehrheitsentscheidung genutzt werden, 
-so dass Schwächen der einen Methode durch andere ausgeglichen werden (Boosting).
+so dass Schwächen der einen Methode durch andere ausgeglichen werden (Boosting). % boosting, regularization, bagging
+
+\iffalse
+\begin{tabular}{|c|c|c|c|c|c|}
+    \hline
+    & Naive Bayes & Entscheidungsbaum & Random Forest & Support Vector Machine & Neuronale Netze \\
+    \hline
+    
+\end{tabular}
+\fi
+
+Wie für alle Methoden des überwachten Lernens gilt auch für die Klassifikation das Verzerrung-Varianz-Dilemma. 
 
 
 \subsection{Evaluation von Klassifikationsmodellen}
@@ -45,13 +59,14 @@ Zur Evaluation eines Klassifikationsmodells kann zB eine Confusion Matrix erstel
 
 Außerdem können aus dieser verschiedene Kennzahlen berechnet werden:
 \begin{itemize}
-    \item $ Precision = \frac{TP}{TP+FP} $ kann für jede Klasse berechnet werden
-    \item $ Recall = \frac{TP}{TP+FN} $ kann für jede Klasse berechnet werden
-    \item $ Accuracy =  \frac{TP+TN}{TP+TN+FP+FN} $
+    \item  Precision$ = \frac{TP}{TP+FP} $ kann für jede Klasse berechnet werden
+    \item  Recall $= \frac{TP}{TP+FN} $ kann für jede Klasse berechnet werden
+    \item  Accuracy $=  \frac{TP+TN}{TP+TN+FP+FN} $
+    \item  F1- Measure = $ \frac{Precision * Recall}{Precision + Recall} $ (Untergrenze = 80\%)
 \end{itemize}
 
 \subsubsection{Cross-Validation mit k Folds}
-Gelabelte Daten werden in $k$ Teile ("Folds") aufgeteilt und jeweils $k-1$ Folds zum Training verwendet,
+Gelabelte Daten werden in $k$ Teile (''Folds'') aufgeteilt und jeweils $k-1$ Folds zum Training verwendet,
 der übrige zum Test. Dies wird für alle Folds ($k$ mal) wiederholt, so dass jeder Fold genau ein mal als zum Test verwendet wird.
 
 Vorteile dieser Methode sind die hohe Güte durch die Menge der Testdaten - 
@@ -103,8 +118,9 @@ Maximal wäre die Entropie einer Quelle mit $n$ möglichen Symbolen wenn alle Sy
 also $H_{max} = -n \cdot \frac{1}{n} \cdot \log_{2}(n)$.
 Bäume werden absteigend nach Informationsgewinn aufgebaut, so dass die erste Verzweigung den größten Informationsgewinn beinhaltet.
 
-Zu berechnen ist also die Entropie des Klassifikators abzüglich der erwarteten Entropie nach der Aufteilung anhand des Attributs.
-\begin{figure}[h]
+Zu berechnen ist also die Entropie des Klassifikators abzüglich der erwarteten Entropie nach der Aufteilung anhand des Attributs, 
+erklärt in Abbildung~\ref{ex:decisiontree}.
+\begin{figure}[H]
 \begin{minipage}{.3\textwidth}
 \begin{tabular}{c|c|c}
     & warm & kalt \\
@@ -120,9 +136,10 @@ nach der Aufteilung anhand des Attributs Temperatur beträgt sie $H_{warm}= H(\f
 und $H_{kalt}= H(\frac{5}{7}, \frac{2}{7})$.
 Also ist die erwartete (Erwartungswert) Entropie nach der Aufteilung anhand der Temperatur $p_{warm} * H_{warm} + p_{kalt} * H_{kalt} $ .
 Der \textbf{Informationsgewinn} berechnet sich dann als Entropie für Regen abzüglich des Erwartungswertes der Entropie.
-Da $H_{prior}$ in dieser Berechnung jedoch konstant ist, kann auch einfach die $E[H]$ nach der Aufteilung minimiert werden.
+Da $H_{prior}$ in dieser Berechnung jedoch konstant ist, kann auch einfach $E[H]$ nach der Aufteilung minimiert werden.
 \end{minipage}
 \caption{Beispiel Informationsgewinn für Aufbau eines Entscheidungsbaums}
+\label{ex:decisiontree}
 \end{figure}
 
 
@@ -130,7 +147,7 @@ Vorteil: Niedriger Rechenaufwand und nachvollziehbarer Aufbau
 Nachteil: Overfitting, geringe Robustheit: bereits kleine Änderungen der Trainingsdaten können zu einer Veränderung des Baums führen.
 
 
-Kann zu einem \textbf{Random Forest} erweitert werden um die Robustheit zu steigern und Overfitting zu verringern.
+Kann zu einem \textbf{Random Forest} (bagging) erweitert werden um die Robustheit zu steigern und Overfitting zu verringern.
 Resultiert jedoch in höherem Rechenaufwand und geringerer Interpretierbarkeit.
 Die Trainingsdaten können dafür zufällig gruppiert werden und die Bäume für eine Mehrheitsentscheidung genutzt werden.
 
@@ -140,11 +157,145 @@ Die Trainingsdaten können dafür zufällig gruppiert werden und die Bäume für
 Support Vector Machines (SVM) haben das Ziel eine Hyperebene zu finden, die zwei Klassen so voneinander trennt,
 dass um die Ebene herum ein möglichst breiter Bereich (Margin) frei von Datenpunkten bleibt.
 Es wird also zunächst eine Ebene aufgestellt, dann Distanzen berechnet und die minimale Distanz maximiert.
-Jeder Punkt kann dann durch seinen Abstand zur Hyperebene und
+Jeder Punkt kann dann durch seinen Abstand zur Hyperebene und einen Stützvektor charakterisiert werden.
+Um Ballungen zu finden, kann die Datenmenge in einer höheren Dimension betrachtet werden (durch Kernel Funktionen, zB Polynomieller Kernel, Radialer Kernel).
+
+Mit einem normierten Normalenvektor $w$, den Datenpunkten $x_{m}$ und dem Stützvektor $h$ der Ebene ist die minimale Distanz dementsprechend
+$\min_{m \in M} |\langle w, x_{m} \rangle - h | $.
+Der Stützvektor kann dabei als $ h=  \langle w,x \rangle $ berechnet werden, wobei $x$ ein beliebiger Punkt in der Ebene ist 
+( mit $ h = ||x|| \cos(\varphi) $, $ {\langle w,x \rangle = ||w|| \cdot ||x|| \cdot \cos(\varphi)   }$  und $||w|| = 1$ da normiert).
+
+
+Mehrere Klassen ($>$2) können hier über 2 Methoden gefunden werden:  und ''One vs One''. % 2/71
+\begin{itemize}
+    \item One vs Rest: Bestimmt die Trennung einer Klasse von allen anderen in k Schritten. Zur Bestimmung wird dann die Klasse mit der höchsten 
+        Konfidenz gewählt.
+    \item One vs One: Berechne $\binom{k}{2}$ um jeweils 2 Klassen von einander zu trennen. Die Klasse ist die häufigste von allen SVMs gewählte.
+\end{itemize}
 
 \section{Clustering}
+Partitionierung von Daten in Partitionen, im Gegensatz zur Klassifikation unüberwacht, es existieren also keine vordefinierten Klassen.
+Kann mit verschiedenen Kennzahlen evaluiert werden.
+\begin{itemize}
+    \item Silhouettenkoeffizient $S_{i} = \frac{b_{i} - a_{i}}{\max(a_{i}, b_{i})}$: 
+        Für einen Datenpunkt $x_{i}$ aus einem Cluster $C_{m}$ ist $a_{i}$ der mittlere Abstand zu Datenpunkten im selben Cluster, also 
+        $ a_{i} = \frac{1}{|C_{m}|}\sum_{x_{j} \in C_{m}} ||x_{i} - x_{j}|| $ 
+        und $b_{i}$ der geringste mittlere Abstand zu den Datenpunkten anderer Cluster (mittlerer Abstand für alle Cluster, dann minimum). 
+        Bewertet wird dann der mittlere Silhouettenkoeffizient $S$ über allen $S_{i}$.
+    \item Reinheit verwendet eine bereits existierende Zuordnung (Klassifikation) um zu bewerten wie gut diese durch das Clustering abgebildet wird.
+        Für die Reinheit eines Clusters gilt dann: $ r(C_{m}) = \frac{1}{|C_{m}|} \max_{j} |C_{m} \cap K_{j}|  $, also die maximale Übereinstimmung mit einer Klasse.
+        Die Reinheit des Clustering ist dann das gewichtete Mittel $r = \sum_{m=1}^{l} \frac{|C_{m}|}{n} \cdot r(C_{m}) $ mit $n$ als Anzahl aller Dateninstanzen.
+\end{itemize}
 \subsection{k-Means Clustering}
+Erzeugt k Mittelpunkte um die sich die Daten gruppieren.
+\begin{enumerate}
+\item k Clusterzentren werden zufällig gewählt 
+\item Datenpunkte werden Zentren anhand der Distanz zugeordnet
+\item Zentren werden in den Mittelpunkt ihres Clusters verschoben
+\item Gehe zu 2. (Abbruchbedingung: keine Neuzuordnung)
+\end{enumerate}
+Tendiert dazu, Cluster räumlich gleich groß zu gestalten, Berechnung jedoch einfach. Außerdem ist das Verfahren empfindlich gegenüber Ausreißern.
+
+Prozess wird mit verschiedenen Anzahlen wiederholt und die Summe der Fehlerquadrate (SSE) berrechnet. 
+Daraus kann eine sinnvolle Zahl gewählt werden, indem im Graph der ''Ellenbogen'' gesucht wird, die Anzahl von Clusterzentren bei der die Fehlersumme weniger sinkt.
+Problem: Abhängig von Initialisierung der Zentren
 \subsection{EM Clustering}
+
+Expectation Maximization Algorithmus: Zuordnung der Dateninstanz basierend auf Wahrscheinlichkeitsverteilungen ausgehend vom Clusterzentrum (Expectation).
+Wie zuvor werden Zentren in das tatsächliche Zentrum verschoben, die Standardabweichung berechnet und Dateninstanzen anhand der neuen Verteilungen zugeordnet (Maximization) 
+bis keine Neuzuordnung mehr stattfindet.
+
+Gegeben eine Normalverteilung ist $N(x, \mu, \sigma)$ also $P(B|A)$, $P(A)$ ist die Wahrscheinlichkeit (prior) dass die Stichprobe sich in $A$ befindet.
+Die Standardabweichung $\sigma$ berechnet sich dabei als $\sqrt{\frac{1}{n}\sum_{1i=1}^{n}(x_{i}-\mu)^{2}} $, $\mu$ ist der Erwartungswert.
+Nach Bayes berechnet sich $P(A|B)$ nun proportional zu $N(x,\mu, \sigma) \cdot P(A)$. Geschätzt werden müssen zu Beginn also die Werte $\mu, \sigma, P(A)$.
+
+
+Kann gut mit fehleneden Werten umgehen, Cluster unterschiedlicher Größe,
+Anfällig für lokale Optima, Initiale Parameter haben starken Einfluss
+
 \section{Assoziationsanalyse}
+Assoziation beschreibt den Zusammenhang von Datenattributen, zB in der Warenkorbanalyse: Welche Waren werden häufig gemeinsam mit anderen gekauft?
+Warenkörbe werden in diesem Fall als Transaktionstabelle (Wahrheitstabelle über Inhalt des Warenkorbs) dargestellt, 
+die Assoziation der Gegenstände wird dann als ''Frequent Itemset'' bezeichnet.
+Frequent Itemsets werden über eine Untergrenze des Supports definiert, z.B. 60\%  (Support darunter wird nicht als ''frequent''  interpretiert).
+Aus den Itemsets können Assoziationsregeln abgeleitet werden, die der Form $X \Rightarrow Y, X \cap Y= \emptyset $ folgen.
+Sei $\{A,B,E\}$ ein Itemset, dann wären mögliche abgeleitete Regeln: $ \{A\} \Rightarrow \{B,E\}, \{A,B\} \Rightarrow \{E\}, ... $
+Regelkandidaten können anschließend über eine geforderte Untergrenze der Konfidenz gefiltert werden.
+
+
+Kennzahlen:
+\begin{itemize}
+    \item Support: Sei $ \{ A,B,E\} $ ein Itemset, dann ist $sup(\{A,B,E\}) = \frac{2}{9}$ der Support (die Wahrscheinlichkeit)
+    dass das Itemset in den vorliegenden Daten auftritt.
+    \item Konfidenz misst, in wie viel Prozent der Fälle, in denen eine Regel zur Anwendung kommt (antecedent), diese Regel auch zutrifft (consequent).
+    Angenommen $ R : X\Rightarrow Y $ ist eine Assoziationsregel,
+    dann ist der Support von R: $ sup(R) = sup(X\cup Y)$
+    und die Konfidenz von R: $ conf(R) = \frac{sup(R)}{sup(X)}$
+\end{itemize}
+
+\subsection{Apriori-Algorithmus}
+Beobachtung:
+\begin{itemize}
+    \item Alle Teilmengen eines Frequent Itemsets sind ebenfalls Frequent Itemsets
+    \item Alle Obermengen eines nicht Frequent Itemsets sind ebenfalls keine Frequent Itemsets
+\end{itemize}
+Ablauf:
+\begin{enumerate}
+    \item Initialisiere $L(1)$ als Menge aller Items, die den Mindestsupport haben
+    \item Bilde die Kandidatenmenge $K(k)$ indem je zwei Itemsets aus $L(k-1)$, die $k-2$ gleiche Elemente besitzen, vereinigt werden
+    \item Entferne alle Itemsets aus $K(k)$, die mindestens eine $k-1$~-elementige Teilmenge besitzen die nicht in $L(k-1)$ ist
+    \item Entferne alle weiteren Itemsets aus $K(k)$ die nicht den Mindestsupport aufweisen
+    \item Breche ab, falls $K(k)$ leer ist, sonst setze $L(k) = K(k)$, inkrementiere k und gehe zu 2.
+\end{enumerate}
+
+
+
+
 \section{Text Mining}
+Automatisierte Analyse und Ableitung von Wissen anhand unstrukturierter Daten. Beispiele sind sentiment analyis, concept linkage, information extraction, summarization.
+Kennzahlen:
+\begin{itemize}
+    \item Binärer Dokumentenvektor (Wort kommt vor / nicht) $bin(t,D) = \{t \in D\}$
+    \item Absolute Dokumentenfrequenz (Anzahl der Vorkommen) $tf_{abs}(t,D) = $ Häufigkeit von $t$ in $D$ 
+    \item Invertierte Dokumentenfrequenz: Wenn ein Schlagwort in vielen Dokumenten vorkommt, ist sein Informationsgehalt gering (zB Name des bewerteten Produkts).
+        Berechnet wird $idf(t,D) = bin(t,D) \cdot \log(\frac{N}{N_{t}})$, wobei $t$ ein Term (Wort), $D$ das zu bewertende Dokument, $N$ als Gesamtmenge der Dokumente und
+        $N_{t}$ als Menge der Dokumente die $t$ enthalten.
+    \item Termfrequenz-Invertierte Dokumentenfrequenz: $tfidf = tf_{abs}(t,D) \cdot \log(\frac{N}{N_{t}})$
+    \item Cosine Ähnlichkeit für Vektoren: $ \cos(\theta) = \frac{a \cdot b}{ \left\lVert a\right\rVert \cdot \left\lVert b \right\rVert } $
+        liegt zwischen $-1$ (entgegengerichtet) und $1$ (gleichgerichtet).
+\end{itemize}
+
+\subsection{Vorverarbeitung}
+In der Vorverarbeitung wird eine Rückführung des Textes auf Stammwörter und Zahlen durchgeführt.
+Kleinere Schritte können die Entfernung von Satzzeichen und Groß-/Kleinschreibung beinhalten, aber auch die Entfernung von Stoppworten (Worte ohne eigene Bedeutung wie zB Artikel).
+Wichtig zu beachten ist jedoch, dass durch jede Verarbeitungsstufe auch Information verloren geht, also immer eine Abwägung zwischen Genauigkeit und Einfachheit vorliegt.
+Bei der \textbf{Tokenisierung} wird ein langer Text in Sätze und Wörter, sog. ''Tokens'' zerlegt. Diese können dann von Modellen verarbeitet werden.
+\textbf{Stemming} trennt Präfixe und Suffixe von Wörtern ab, um Form und Bedeutung des Wortstamms zu ermitteln (z.B. Porter-Stemmer-Algorithmus immer wieder bis keine Reduktion mehr auftritt).
+\textbf{Lemmatisierung} ermittelt Wortstäme über ein Lexikon, wodurch die entstehenden Wortstämme ebenfalls Wörter sind. 
+Erlaubt eine präzisere Verknüpfung (''gut, besser'') als Stemming, jedoch auch höhere Komplexität.
+
+Schritte:
+\begin{enumerate}
+    \item Text Cleanup (z.B. Entfernung von HtML Tags)
+    \item Tokenization, Kleinschreibung, Interpunktion entfernen
+    \item Stoppworte entfernen
+    \item Stamm- oder Grundformreduzierung
+\end{enumerate}
+
+\subsection{Modelle}
+\begin{itemize}
+    \item Bag of Words: Sätze werden als Multimengen repräsentiert, also ohne Beachtung der Reihenfolge, aber mit Multiplizitäten der Tokens (Wörter).
+    \item Vektorraum: Die Dokumentenfrequenzen werden als Vektor dargestellt, bei dem jeder Dimension einem Term entspricht.
+        Problem: keine Assoziationen, hohe Dimensionen (hinzufügen einer Dimension für jedes neue Wort)
+    \item Word Embeddings(zB Word2Vec): Vektorraum mit fester Dimension, der ähnliche Terme (semantische Nähe, im gleichen Kontext, zB Getränke verbunden durch ''trinken'')
+        durch räumliche Nähe repräsentiert.
+        Per supervised learning kann auch das Sentiment von Wörtern wie gut $\leftrightarrow$  schlecht als Vektor repräsentiert werden, 
+        da diese über reine Semantik sehr ähnlich wären. 
+        Word2Vec unterscheidet zwischen zwei Ansätzen zum Lernen von Word Embeddings. 
+        Der Continuous Bag-of-Words Ansatz hat das Ziel ein Target Word auf Basis von Kontextörtern zu prognostizieren, Skip Gram umgekehrt. 
+        Word Embeddings können beispielsweise genutzt werden, um von einer Beziehung auf andere Beziehung zu schließen: (Paris-Frankreich gleiche Beziehung Rom-Italien).
+        Benötigt jedoch größere Textmengen und Trainingsaufwand als klassischer Vektorraum.
+\end{itemize}
+Generierte Modelle können dann klassifiziert werden: Positive / negative Bewertung, oÄ.
+
 \end{document}
